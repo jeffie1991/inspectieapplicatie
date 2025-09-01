@@ -1,44 +1,75 @@
-name: Reviewer (ChatGPT-5)
+name: Reviewer (OpenAI)
 permissions:
   pull-requests: write
+
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
+
 jobs:
   review:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Get Diff
         id: diff
         run: |
           git fetch origin ${{ github.base_ref }}
           git diff origin/${{ github.base_ref }}... --unified=0 > diff.patch
-      - name: Ask ChatGPT-5 for Review
+
+      - name: Ask OpenAI for Review (curl)
         id: gpt
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python - << 'PY'
-import os, json, requests
-diff = open("diff.patch","r",encoding="utf-8",errors="ignore").read()[:200000]
-prompt = f"""
-You are a Staff Engineer. Review this diff for correctness, security (Firebase Rules, signed URLs), performance (PDF/IFC budgets), accessibility, and test coverage.
-Return ONLY markdown with:
-1) SUMMARY
-2) BLOCKERS (must fix)
-3) SUGGESTIONS
-4) TESTS to add
-Diff:
-{diff}
-"""
-res = requests.post("https://api.openai.com/v1/chat/completions",
-  headers={"Authorization":f"Bearer {os.environ['OPENAI_API_KEY']}", "Content-Type":"application/json"},
-  json={"model":"gpt-5-think-preview","messages":[{"role":"user","content":prompt}], "temperature":0}
-).json()
-text = res["choices"][0]["message"]["content"]
-open("review.md","w",encoding="utf-8").write(text)
+          DIFF=$(python3 - << 'PY'
+import sys
+d = open("diff.patch","r",encoding="utf-8",errors="ignore").read()
+print(d[:200000])  # limit payload
 PY
-      - name: Comment on PR
+)
+          JSON=$(cat << 'EOF'
+{
+  "model": "gpt-4o-mini",
+  "temperature": 0,
+  "messages": [
+    {
+      "role": "user",
+      "content": "You are a Staff Engineer. Review this diff for correctness, security (Firebase Rules, signed URLs), performance (PDF/IFC budgets), accessibility, and test coverage. Return ONLY markdown with: 1) SUMMARY 2) BLOCKERS (must fix) 3) SUGGESTIONS 4) TESTS to add.\n\nDiff:\n<<<DIFF>>>"
+    }
+  ]
+}
+EOF
+)
+          JSON="${JSON/<<<DIFF>>>/${DIFF//$'\n'/\\n}}"
+          echo "$JSON" > req.json
+          curl -sS https://api.openai.com/v1/chat/completions \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @req.json > out.json
+          cat out.json
+
+      - name: Extract review text
+        id: extract
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} -F review.md
+          python3 - << 'PY'
+import json
+data = json.load(open("out.json","r",encoding="utf-8"))
+text = data["choices"][0]["message"]["content"]
+open("review.md","w",encoding="utf-8").write(text)
+print(text)
+PY
+
+      - name: Comment on PR (github-script)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('review.md','utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
