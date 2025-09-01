@@ -16,16 +16,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # we still fetch specific SHAs below; this avoids odd detached HEAD issues
 
-      - name: Generate diff
+      - name: Determine SHAs
+        id: shas
         run: |
-          git fetch origin ${{ github.base_ref }}
-          git diff origin/${{ github.base_ref }}... --unified=0 > diff.patch
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+      - name: Fetch base & head commits (shallow)
+        run: |
+          git fetch --no-tags --prune --depth=1 origin ${BASE_SHA}
+          git fetch --no-tags --prune --depth=1 origin ${HEAD_SHA}
+
+      - name: Generate diff (unified=0)
+        run: |
+          git diff ${BASE_SHA} ${HEAD_SHA} --unified=0 > diff.patch
+          echo "Diff size: $(wc -c < diff.patch) bytes"
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
       - name: Run reviewer
         env:
