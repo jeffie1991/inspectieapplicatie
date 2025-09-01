@@ -1,3 +1,873 @@
+diff --git a/diff.patch b/diff.patch
+index 86abab0..d2f03d0 100644
+--- a/diff.patch
++++ b/diff.patch
+@@ -1,3 +0,0 @@
+-diff --git a/commands.txt b/commands.txt
+-new file mode 100644
+-index 0000000..e69de29
+@@ -5,3 +2,2 @@ diff --git a/index.html b/index.html
+-new file mode 100644
+-index 0000000..fb4a4b9
+---- /dev/null
++index d5a04a0..9ecbd54 100644
++--- a/index.html
+@@ -9,93 +5,3 @@ index 0000000..fb4a4b9
+-@@ -0,0 +1,93 @@
+-+<!DOCTYPE html>
+-+<html lang="en">
+-+<head>
+-+    <meta charset="UTF-8">
+-+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-+    <title>PDF Viewer</title>
+-+    <link rel="stylesheet" href="styles.css">
+-+</head>
+-+<body>
+-+    <div class="app-container">
+-+        <!-- Toolbar -->
+-+        <div class="toolbar">
+-+            <div class="toolbar-left">
+-+                <input type="file" id="fileInput" accept=".pdf" class="file-input">
+-+                <label for="fileInput" class="btn btn-primary">Open PDF</label>
+-+            </div>
+-+            <div class="toolbar-center">
+-+                <button class="btn" id="prevPage">←</button>
+-+                <span class="page-info">
+-+                    <input type="number" id="pageNum" value="1" min="1"> / 
+-+                    <span id="pageCount">0</span>
+-+                </span>
+-+                <button class="btn" id="nextPage">→</button>
+-+            </div>
+-+            <div class="toolbar-right">
+-+                <button class="btn" id="zoomOut">-</button>
+-+                <span id="zoomLevel">100%</span>
+-+                <button class="btn" id="zoomIn">+</button>
+-+            </div>
+-+        </div>
+-+
+-+        <div class="main-content">
+-+            <!-- Thumbnails Panel -->
+-+            <div class="thumbnails-panel" id="thumbnailsPanel">
+-+                <div class="panel-header">
+-+                    <h3>Thumbnails</h3>
+-+                </div>
+-+                <div class="thumbnails-container" id="thumbnailsContainer">
+-+                    <!-- Thumbnail skeleton loaders -->
+-+                    <div class="thumbnail-skeleton"></div>
+-+                    <div class="thumbnail-skeleton"></div>
+-+                    <div class="thumbnail-skeleton"></div>
+-+                </div>
+-+            </div>
+-+
+-+            <!-- PDF Viewer -->
+-+            <div class="pdf-viewer">
+-+                <div class="loading-skeleton" id="loadingSkeleton">
+-+                    <div class="skeleton-page"></div>
+-+                </div>
+-+                <div class="error-state hidden" id="errorState">
+-+                    <div class="error-content">
+-+                        <h3>Failed to load PDF</h3>
+-+                        <p>Please try again or select a different file.</p>
+-+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+-+                            Choose Another File
+-+                        </button>
+-+                    </div>
+-+                </div>
+-+                <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+-+            </div>
+-+
+-+            <!-- Side Panel -->
+-+            <div class="side-panel" id="sidePanel">
+-+                <div class="panel-header">
+-+                    <h3>Document Info</h3>
+-+                </div>
+-+                <div class="panel-content">
+-+                    <div class="info-item">
+-+                        <label>Title:</label>
+-+                        <span id="docTitle">-</span>
+-+                    </div>
+-+                    <div class="info-item">
+-+                        <label>Author:</label>
+-+                        <span id="docAuthor">-</span>
+-+                    </div>
+-+                    <div class="info-item">
+-+                        <label>Pages:</label>
+-+                        <span id="docPages">-</span>
+-+                    </div>
+-+                    <div class="info-item">
+-+                        <label>Size:</label>
+-+                        <span id="docSize">-</span>
+-+                    </div>
+-+                </div>
+-+            </div>
+-+        </div>
+-+    </div>
+-+
+-+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+-+    <script src="app.js"></script>
+-+</body>
++@@ -96 +96 @@
++-</html>
++\ No newline at end of file
+@@ -103 +9 @@ index 0000000..fb4a4b9
+-diff --git a/styles.css b/styles.css
++diff --git a/src/components/MapCanvas.vue b/src/components/MapCanvas.vue
+@@ -105 +11 @@ new file mode 100644
+-index 0000000..c51780b
++index 0000000..487d1de
+@@ -107,204 +13,342 @@ index 0000000..c51780b
+-+++ b/styles.css
+-@@ -0,0 +1,262 @@
+-+* {
+-+    margin: 0;
+-+    padding: 0;
+-+    box-sizing: border-box;
+-+}
+-+
+-+body {
+-+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+-+    background: #f5f5f5;
+-+    height: 100vh;
+-+    overflow: hidden;
+-+}
+-+
+-+.app-container {
+-+    display: flex;
+-+    flex-direction: column;
+-+    height: 100vh;
+-+}
+-+
+-+/* Toolbar */
+-+.toolbar {
+-+    display: flex;
+-+    justify-content: space-between;
+-+    align-items: center;
+-+    padding: 10px 20px;
+-+    background: #fff;
+-+    border-bottom: 1px solid #e0e0e0;
+-+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+-+    z-index: 1000;
+-+}
+-+
+-+.toolbar-left, .toolbar-center, .toolbar-right {
+-+    display: flex;
+-+    align-items: center;
+-+    gap: 10px;
+-+}
+-+
+-+.btn {
+-+    padding: 8px 16px;
+-+    border: 1px solid #ddd;
+-+    background: #fff;
+-+    border-radius: 4px;
+-+    cursor: pointer;
+-+    transition: all 0.2s;
+-+}
+-+
+-+.btn:hover {
+-+    background: #f0f0f0;
+-+}
+-+
+-+.btn-primary {
+-+    background: #007bff;
+-+    color: white;
+-+    border-color: #007bff;
+-+}
+-+
+-+.btn-primary:hover {
+-+    background: #0056b3;
+-+}
+-+
+-+.file-input {
+-+    display: none;
+-+}
+-+
+-+.page-info {
+-+    display: flex;
+-+    align-items: center;
+-+    gap: 5px;
+-+}
+-+
+-+#pageNum {
+-+    width: 60px;
+-+    padding: 4px 8px;
+-+    border: 1px solid #ddd;
+-+    border-radius: 4px;
+-+    text-align: center;
+-+}
+-+
+-+/* Main Content */
+-+.main-content {
+-+    display: flex;
+-+    flex: 1;
+-+    overflow: hidden;
+-+}
+-+
+-+/* Thumbnails Panel */
+-+.thumbnails-panel {
+-+    width: 200px;
+-+    background: #fff;
+-+    border-right: 1px solid #e0e0e0;
+-+    display: flex;
+-+    flex-direction: column;
+-+}
+-+
+-+.panel-header {
+-+    padding: 15px;
+-+    border-bottom: 1px solid #e0e0e0;
+-+    background: #f8f9fa;
+-+}
+-+
+-+.panel-header h3 {
+-+    font-size: 14px;
+-+    font-weight: 600;
+-+    color: #333;
+-+}
+-+
+-+.thumbnails-container {
+-+    flex: 1;
+-+    overflow-y: auto;
+-+    padding: 10px;
+-+}
+-+
+-+.thumbnail-skeleton {
+-+    width: 100%;
+-+    height: 120px;
+-+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+-+    background-size: 200% 100%;
+-+    animation: loading 1.5s infinite;
+-+    margin-bottom: 10px;
+-+    border-radius: 4px;
+-+}
+-+
+-+.thumbnail {
+-+    width: 100%;
+-+    margin-bottom: 10px;
+-+    border: 2px solid transparent;
+-+    border-radius: 4px;
+-+    cursor: pointer;
+-+    transition: border-color 0.2s;
+-+}
+-+
+-+.thumbnail:hover {
+-+    border-color: #007bff;
+-+}
+-+
+-+.thumbnail.active {
+-+    border-color: #007bff;
+-+    box-shadow: 0 0 8px rgba(0,123,255,0.3);
+-+}
+-+
+-+/* PDF Viewer */
+-+.pdf-viewer {
+-+    flex: 1;
+-+    display: flex;
+-+    align-items: center;
+-+    justify-content: center;
+-+    overflow: auto;
+-+    background: #e5e5e5;
+-+    position: relative;
+-+}
+-+
+-+.loading-skeleton {
+-+    display: flex;
+-+    align-items: center;
+-+    justify-content: center;
+-+}
+-+
+-+.skeleton-page {
+-+    width: 600px;
+-+    height: 800px;
+-+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+-+    background-size: 200% 100%;
+-+    animation: loading 1.5s infinite;
+-+    border-radius: 8px;
+-+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+-+}
+-+
+-+.pdf-canvas {
+-+    max-width: 100%;
+-+    max-height: 100%;
+-+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+-+    background: white;
+-+    margin: 20px;
+-+}
+-+
+-+.error-state {
+-+    display: flex;
+-+    align-items: center;
+-+    justify-content: center;
+-+    flex: 1;
+-+}
+-+
+-+.error-content {
+-+    text-align: center;
+-+    padding: 40px;
+-+    background: white;
+-+    border-radius: 8px;
+-+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+-+}
+-+
+-+.error-content h3 {
+-+    color: #dc3545;
+-+    margin-bottom: 10px;
+-+}
+-+
+-+.error-content p {
+-+    color: #666;
+-+    margin-bottom: 20px;
+-+}
+-+
+-+.hidden {
+-+    display: none !important;
+++++ b/src/components/MapCanvas.vue
++@@ -0,0 +1,386 @@
+++<template>
+++  <div class="map-canvas" ref="canvasContainer">
+++    <svg
+++      ref="svgOverlay"
+++      class="overlay"
+++      @mousedown="onMouseDown"
+++      @mousemove="onMouseMove"
+++      @mouseup="onMouseUp"
+++      @click="onClick"
+++    >
+++      <g v-for="shape in shapes" :key="shape.id">
+++        <polygon
+++          v-if="shape.type === 'polygon'"
+++          :points="shape.points"
+++          :class="{ selected: selectedShapes.includes(shape.id) }"
+++          class="shape"
+++          @click.stop="selectShape(shape.id, $event)"
+++        />
+++        <rect
+++          v-else-if="shape.type === 'rectangle'"
+++          :x="shape.x"
+++          :y="shape.y"
+++          :width="shape.width"
+++          :height="shape.height"
+++          :class="{ selected: selectedShapes.includes(shape.id) }"
+++          class="shape"
+++          @click.stop="selectShape(shape.id, $event)"
+++        />
+++      </g>
+++      
+++      <!-- Current drawing shape -->
+++      <polygon
+++        v-if="currentLasso.length > 0 && drawingMode === 'lasso'"
+++        :points="currentLassoPoints"
+++        class="drawing-shape"
+++      />
+++      <rect
+++        v-if="currentRect && drawingMode === 'rectangle'"
+++        :x="currentRect.x"
+++        :y="currentRect.y"
+++        :width="currentRect.width"
+++        :height="currentRect.height"
+++        class="drawing-shape"
+++      />
+++      
+++      <!-- Selection rectangle -->
+++      <rect
+++        v-if="selectionRect"
+++        :x="selectionRect.x"
+++        :y="selectionRect.y"
+++        :width="selectionRect.width"
+++        :height="selectionRect.height"
+++        class="selection-rect"
+++      />
+++    </svg>
+++  </div>
+++</template>
+++
+++<script>
+++import * as Y from 'yjs'
+++import { WebsocketProvider } from 'y-websocket'
+++import { collection, doc, setDoc } from 'firebase/firestore'
+++import { db } from '@/firebase'
+++import { useMapStore } from '@/stores/mapStore'
+++
+++export default {
+++  name: 'MapCanvas',
+++  data() {
+++    return {
+++      drawingMode: null, // 'lasso', 'rectangle', 'select'
+++      isDrawing: false,
+++      currentLasso: [],
+++      currentRect: null,
+++      selectionRect: null,
+++      selectedShapes: [],
+++      shapes: [],
+++      ydoc: null,
+++      yshapes: null,
+++      provider: null,
+++      snapThreshold: 10
+++    }
+++  },
+++  computed: {
+++    currentLassoPoints() {
+++      return this.currentLasso.map(p => `${p.x},${p.y}`).join(' ')
+++    }
+++  },
+++  mounted() {
+++    this.initYjs()
+++    this.setupEventListeners()
+++  },
+++  beforeUnmount() {
+++    if (this.provider) {
+++      this.provider.destroy()
+++    }
+++  },
+++  methods: {
+++    initYjs() {
+++      this.ydoc = new Y.Doc()
+++      this.yshapes = this.ydoc.getArray('shapes')
+++      
+++      this.provider = new WebsocketProvider('ws://localhost:1234', 'map-room', this.ydoc)
+++      
+++      this.yshapes.observe(this.syncShapes)
+++      this.syncShapes()
+++    },
+++    
+++    syncShapes() {
+++      this.shapes = this.yshapes.toArray()
+++    },
+++    
+++    setupEventListeners() {
+++      document.addEventListener('keydown', this.onKeyDown)
+++      document.addEventListener('keyup', this.onKeyUp)
+++    },
+++    
+++    onKeyDown(e) {
+++      if (e.key === 'Escape') {
+++        this.cancelDrawing()
+++      }
+++      if (e.ctrlKey && e.key === 'z') {
+++        e.preventDefault()
+++        this.undo()
+++      }
+++      if (e.ctrlKey && e.key === 'y') {
+++        e.preventDefault()
+++        this.redo()
+++      }
+++    },
+++    
+++    onMouseDown(e) {
+++      const point = this.getMousePosition(e)
+++      
+++      if (this.drawingMode === 'lasso') {
+++        this.isDrawing = true
+++        this.currentLasso = [point]
+++      } else if (this.drawingMode === 'rectangle') {
+++        this.isDrawing = true
+++        this.currentRect = { x: point.x, y: point.y, width: 0, height: 0 }
+++      } else if (e.ctrlKey) {
+++        this.isDrawing = true
+++        this.selectionRect = { x: point.x, y: point.y, width: 0, height: 0 }
+++      }
+++    },
+++    
+++    onMouseMove(e) {
+++      if (!this.isDrawing) return
+++      
+++      const point = this.getMousePosition(e)
+++      
+++      if (this.drawingMode === 'lasso') {
+++        this.currentLasso.push(this.snapToEdge(point))
+++      } else if (this.drawingMode === 'rectangle') {
+++        this.currentRect.width = point.x - this.currentRect.x
+++        this.currentRect.height = point.y - this.currentRect.y
+++      } else if (this.selectionRect) {
+++        this.selectionRect.width = point.x - this.selectionRect.x
+++        this.selectionRect.height = point.y - this.selectionRect.y
+++      }
+++    },
+++    
+++    onMouseUp(e) {
+++      if (!this.isDrawing) return
+++      
+++      this.isDrawing = false
+++      
+++      if (this.drawingMode === 'lasso' && this.currentLasso.length > 2) {
+++        this.finalizeLasso()
+++      } else if (this.drawingMode === 'rectangle' && this.currentRect) {
+++        this.finalizeRectangle()
+++      } else if (this.selectionRect) {
+++        this.selectShapesInRect()
+++        this.selectionRect = null
+++      }
+++    },
+++    
+++    onClick(e) {
+++      if (!e.ctrlKey && !e.shiftKey) {
+++        this.selectedShapes = []
+++      }
+++    },
+++    
+++    finalizeLasso() {
+++      const shape = {
+++        id: Date.now().toString(),
+++        type: 'polygon',
+++        points: this.currentLasso.map(p => `${p.x},${p.y}`).join(' '),
+++        timestamp: Date.now()
+++      }
+++      
+++      this.yshapes.push([shape])
+++      this.currentLasso = []
+++      this.saveToFirestore()
+++    },
+++    
+++    finalizeRectangle() {
+++      const shape = {
+++        id: Date.now().toString(),
+++        type: 'rectangle',
+++        x: this.currentRect.x,
+++        y: this.currentRect.y,
+++        width: Math.abs(this.currentRect.width),
+++        height: Math.abs(this.currentRect.height),
+++        timestamp: Date.now()
+++      }
+++      
+++      this.yshapes.push([shape])
+++      this.currentRect = null
+++      this.saveToFirestore()
+++    },
+++    
+++    selectShape(shapeId, e) {
+++      if (e.shiftKey) {
+++        if (this.selectedShapes.includes(shapeId)) {
+++          this.selectedShapes = this.selectedShapes.filter(id => id !== shapeId)
+++        } else {
+++          this.selectedShapes.push(shapeId)
+++        }
+++      } else {
+++        this.selectedShapes = [shapeId]
+++      }
+++    },
+++    
+++    selectShapesInRect() {
+++      const rect = this.selectionRect
+++      this.selectedShapes = this.shapes
+++        .filter(shape => this.shapeIntersectsRect(shape, rect))
+++        .map(shape => shape.id)
+++    },
+++    
+++    shapeIntersectsRect(shape, rect) {
+++      if (shape.type === 'rectangle') {
+++        return !(shape.x > rect.x + rect.width || 
+++                 shape.x + shape.width < rect.x ||
+++                 shape.y > rect.y + rect.height ||
+++                 shape.y + shape.height < rect.y)
+++      }
+++      return false // Simplified for polygons
+++    },
+++    
+++    snapToEdge(point) {
+++      // Find nearby shape edges and snap to them
+++      for (const shape of this.shapes) {
+++        if (shape.type === 'rectangle') {
+++          const edges = [
+++            { x: shape.x, y: point.y },
+++            { x: shape.x + shape.width, y: point.y },
+++            { x: point.x, y: shape.y },
+++            { x: point.x, y: shape.y + shape.height }
+++          ]
+++          
+++          for (const edge of edges) {
+++            if (Math.abs(point.x - edge.x) < this.snapThreshold && 
+++                Math.abs(point.y - edge.y) < this.snapThreshold) {
+++              return edge
+++            }
+++          }
+++        }
+++      }
+++      return point
+++    },
+++    
+++    getMousePosition(e) {
+++      const rect = this.$refs.svgOverlay.getBoundingClientRect()
+++      return {
+++        x: e.clientX - rect.left,
+++        y: e.clientY - rect.top
+++      }
+++    },
+++    
+++    setDrawingMode(mode) {
+++      this.drawingMode = mode
+++      this.cancelDrawing()
+++    },
+++    
+++    cancelDrawing() {
+++      this.isDrawing = false
+++      this.currentLasso = []
+++      this.currentRect = null
+++      this.selectionRect = null
+++    },
+++    
+++    undo() {
+++      if (this.yshapes.length > 0) {
+++        this.yshapes.delete(this.yshapes.length - 1, 1)
+++        this.saveToFirestore()
+++      }
+++    },
+++    
+++    redo() {
+++      // Simplified redo - would need proper history stack
+++    },
+++    
+++    async saveToFirestore() {
+++      try {
+++        const geoJson = this.shapesToGeoJSON()
+++        const docRef = doc(collection(db, 'maps'), 'current-map')
+++        await setDoc(docRef, {
+++          geoJson,
+++          metadata: {
+++            lastModified: Date.now(),
+++            shapeCount: this.shapes.length
+++          }
+++        })
+++      } catch (error) {
+++        console.error('Error saving to Firestore:', error)
+++      }
+++    },
+++    
+++    shapesToGeoJSON() {
+++      return {
+++        type: 'FeatureCollection',
+++        features: this.shapes.map(shape => ({
+++          type: 'Feature',
+++          geometry: shape.type === 'rectangle' 
+++            ? {
+++                type: 'Polygon',
+++                coordinates: [[
+++                  [shape.x, shape.y],
+++                  [shape.x + shape.width, shape.y],
+++                  [shape.x + shape.width, shape.y + shape.height],
+++                  [shape.x, shape.y + shape.height],
+++                  [shape.x, shape.y]
+++                ]]
+++              }
+++            : {
+++                type: 'Polygon',
+++                coordinates: [shape.points.split(' ').map(p => {
+++                  const [x, y] = p.split(',').map(Number)
+++                  return [x, y]
+++                })]
+++              },
+++          properties: {
+++            id: shape.id,
+++            timestamp: shape.timestamp
+++          }
+++        }))
+++      }
+++    }
+++  }
+@@ -311,0 +356 @@ index 0000000..c51780b
+++</script>
+@@ -313,7 +358,5 @@ index 0000000..c51780b
+-+/* Side Panel */
+-+.side-panel {
+-+    width: 250px;
+-+    background: #fff;
+-+    border-left: 1px solid #e0e0e0;
+-+    display: flex;
+-+    flex-direction: column;
+++<style scoped>
+++.map-canvas {
+++  position: relative;
+++  width: 100%;
+++  height: 100vh;
+@@ -322,2 +365,7 @@ index 0000000..c51780b
+-+.panel-content {
+-+    padding: 15px;
+++.overlay {
+++  position: absolute;
+++  top: 0;
+++  left: 0;
+++  width: 100%;
+++  height: 100%;
+++  cursor: crosshair;
+@@ -326,4 +374,5 @@ index 0000000..c51780b
+-+.info-item {
+-+    display: flex;
+-+    flex-direction: column;
+-+    margin-bottom: 15px;
+++.shape {
+++  fill: rgba(66, 165, 245, 0.3);
+++  stroke: #42a5f5;
+++  stroke-width: 2;
+++  cursor: pointer;
+@@ -332,6 +381,4 @@ index 0000000..c51780b
+-+.info-item label {
+-+    font-weight: 600;
+-+    color: #333;
+-+    font-size: 12px;
+-+    text-transform: uppercase;
+-+    margin-bottom: 5px;
+++.shape.selected {
+++  fill: rgba(255, 193, 7, 0.4);
+++  stroke: #ffc107;
+++  stroke-width: 3;
+@@ -340,4 +387,5 @@ index 0000000..c51780b
+-+.info-item span {
+-+    color: #666;
+-+    font-size: 14px;
+-+    word-break: break-word;
+++.drawing-shape {
+++  fill: rgba(76, 175, 80, 0.3);
+++  stroke: #4caf50;
+++  stroke-width: 2;
+++  stroke-dasharray: 5,5;
+@@ -346,8 +394,5 @@ index 0000000..c51780b
+-+/* Loading Animation */
+-+@keyframes loading {
+-+    0% {
+-+        background-position: 200% 0;
+-+    }
+-+    100% {
+-+        background-position: -200% 0;
+-+    }
+++.selection-rect {
+++  fill: rgba(33, 150, 243, 0.1);
+++  stroke: #2196f3;
+++  stroke-width: 1;
+++  stroke-dasharray: 3,3;
+@@ -355,6 +400,24 @@ index 0000000..c51780b
+-+
+-+/* Responsive */
+-+@media (max-width: 768px) {
+-+    .thumbnails-panel {
+-+        width: 150px;
+-+    }
+++</style>
++\ No newline at end of file
++diff --git a/src/stores/mapStore.js b/src/stores/mapStore.js
++new file mode 100644
++index 0000000..535375f
++--- /dev/null
+++++ b/src/stores/mapStore.js
++@@ -0,0 +1,66 @@
+++import { defineStore } from 'pinia'
+++
+++export const useMapStore = defineStore('map', {
+++  state: () => ({
+++    shapes: [],
+++    selectedShapes: [],
+++    drawingMode: null,
+++    history: [],
+++    historyIndex: -1
+++  }),
+++  
+++  actions: {
+++    addShape(shape) {
+++      this.shapes.push(shape)
+++      this.addToHistory()
+++    },
+@@ -362,3 +425,10 @@ index 0000000..c51780b
+-+    .side-panel {
+-+        width: 200px;
+-+    }
+++    removeShape(shapeId) {
+++      this.shapes = this.shapes.filter(s => s.id !== shapeId)
+++      this.addToHistory()
+++    },
+++    
+++    selectShape(shapeId) {
+++      if (!this.selectedShapes.includes(shapeId)) {
+++        this.selectedShapes.push(shapeId)
+++      }
+++    },
+@@ -366,3 +436,35 @@ index 0000000..c51780b
+-+    .toolbar-center {
+-+        flex: 1;
+-+        justify-content: center;
+++    deselectShape(shapeId) {
+++      this.selectedShapes = this.selectedShapes.filter(id => id !== shapeId)
+++    },
+++    
+++    clearSelection() {
+++      this.selectedShapes = []
+++    },
+++    
+++    setDrawingMode(mode) {
+++      this.drawingMode = mode
+++    },
+++    
+++    addToHistory() {
+++      this.history = this.history.slice(0, this.historyIndex + 1)
+++      this.history.push(JSON.parse(JSON.stringify(this.shapes)))
+++      this.historyIndex++
+++      
+++      if (this.history.length > 50) {
+++        this.history.shift()
+++        this.historyIndex--
+++      }
+++    },
+++    
+++    undo() {
+++      if (this.historyIndex > 0) {
+++        this.historyIndex--
+++        this.shapes = JSON.parse(JSON.stringify(this.history[this.historyIndex]))
+++      }
+++    },
+++    
+++    redo() {
+++      if (this.historyIndex < this.history.length - 1) {
+++        this.historyIndex++
+++        this.shapes = JSON.parse(JSON.stringify(this.history[this.historyIndex]))
+++      }
+@@ -370 +472,2 @@ index 0000000..c51780b
+-+}
+++  }
+++})
+diff --git a/firestore.rules b/firestore.rules
+index 7083dab..5c6a14d 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -4,6 +4,4 @@ service cloud.firestore {
+-    // PDF files collection
+-    match /pdfs/{pdfId} {
+-      allow read, write: if request.auth != null 
+-        && request.auth.uid == resource.data.userId;
+-      allow create: if request.auth != null 
+-        && request.auth.uid == request.resource.data.userId;
++    // Maps collection - require authentication
++    match /maps/{document} {
++      allow read, write: if request.auth != null;
++      allow read: if resource.data.public == true;
+@@ -12 +10 @@ service cloud.firestore {
+-    // User profiles
++    // User-specific data
+@@ -14,2 +12 @@ service cloud.firestore {
+-      allow read, write: if request.auth != null 
+-        && request.auth.uid == userId;
++      allow read, write: if request.auth != null && request.auth.uid == userId;
+@@ -17,9 +14,16 @@ service cloud.firestore {
+-  }
+-}
+-
+-service firebase.storage {
+-  match /b/{bucket}/o {
+-    // PDF files in storage
+-    match /pdfs/{userId}/{pdfId} {
+-      allow read, write: if request.auth != null 
+-        && request.auth.uid == userId;
++    
++    // Shared maps with specific permissions
++    match /shared_maps/{mapId} {
++      allow read: if request.auth != null && 
++        (request.auth.uid in resource.data.viewers || 
++         request.auth.uid in resource.data.editors ||
++         request.auth.uid == resource.data.owner);
++      
++      allow write: if request.auth != null && 
++        (request.auth.uid in resource.data.editors ||
++         request.auth.uid == resource.data.owner);
++    }
++    
++    // Deny all other access
++    match /{document=**} {
++      allow read, write: if false;
 diff --git a/index.html b/index.html
 index d5a04a0..9ecbd54 100644
 --- a/index.html
@@ -8,10 +878,10 @@ index d5a04a0..9ecbd54 100644
 +</html>
 diff --git a/src/components/MapCanvas.vue b/src/components/MapCanvas.vue
 new file mode 100644
-index 0000000..487d1de
+index 0000000..a7db7c7
 --- /dev/null
 +++ b/src/components/MapCanvas.vue
-@@ -0,0 +1,386 @@
+@@ -0,0 +1,418 @@
 +<template>
 +  <div class="map-canvas" ref="canvasContainer">
 +    <svg
@@ -91,12 +961,16 @@ index 0000000..487d1de
 +      ydoc: null,
 +      yshapes: null,
 +      provider: null,
-+      snapThreshold: 10
++      snapThreshold: 10,
++      saveError: null
 +    }
 +  },
 +  computed: {
 +    currentLassoPoints() {
 +      return this.currentLasso.map(p => `${p.x},${p.y}`).join(' ')
++    },
++    websocketUrl() {
++      return process.env.VUE_APP_WEBSOCKET_URL || 'ws://localhost:1234'
 +    }
 +  },
 +  mounted() {
@@ -113,7 +987,7 @@ index 0000000..487d1de
 +      this.ydoc = new Y.Doc()
 +      this.yshapes = this.ydoc.getArray('shapes')
 +      
-+      this.provider = new WebsocketProvider('ws://localhost:1234', 'map-room', this.ydoc)
++      this.provider = new WebsocketProvider(this.websocketUrl, 'map-room', this.ydoc)
 +      
 +      this.yshapes.observe(this.syncShapes)
 +      this.syncShapes()
@@ -306,9 +1180,12 @@ index 0000000..487d1de
 +    },
 +    
 +    async saveToFirestore() {
++      this.saveError = null
++      
 +      try {
 +        const geoJson = this.shapesToGeoJSON()
 +        const docRef = doc(collection(db, 'maps'), 'current-map')
++        
 +        await setDoc(docRef, {
 +          geoJson,
 +          metadata: {
@@ -316,8 +1193,33 @@ index 0000000..487d1de
 +            shapeCount: this.shapes.length
 +          }
 +        })
++        
 +      } catch (error) {
++        this.saveError = this.getErrorMessage(error)
 +        console.error('Error saving to Firestore:', error)
++        
++        // Show user notification
++        this.$emit('save-error', this.saveError)
++        
++        // Retry logic for network errors
++        if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
++          setTimeout(() => this.saveToFirestore(), 2000)
++        }
++      }
++    },
++    
++    getErrorMessage(error) {
++      switch (error.code) {
++        case 'permission-denied':
++          return 'You do not have permission to save changes. Please check your login status.'
++        case 'unavailable':
++          return 'Service temporarily unavailable. Retrying...'
++        case 'deadline-exceeded':
++          return 'Save operation timed out. Retrying...'
++        case 'unauthenticated':
++          return 'Please log in to save your changes.'
++        default:
++          return 'Failed to save changes. Please try again.'
 +      }
 +    },
 +    

@@ -1,10 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Maps collection - require authentication
+    // Maps collection - require user ownership or sharing permissions
     match /maps/{document} {
-      allow read, write: if request.auth != null;
-      allow read: if resource.data.public == true;
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || 
+         request.auth.uid in resource.data.editors ||
+         request.auth.uid in resource.data.viewers);
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
     }
     
     // User-specific data
