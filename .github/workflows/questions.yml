@@ -1,0 +1,16 @@
+name: Route Questions
+on:
+  pull_request_review_comment:
+    types: [created]
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Slack
+        if: contains(github.event.comment.body, 'NEEDS-OWNER') || contains(github.event.comment.body, 'QUESTION')
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"${{ github.event.comment.html_url }}\n${{ github.event.comment.body }}\"}" \
+          $SLACK_WEBHOOK_URL
