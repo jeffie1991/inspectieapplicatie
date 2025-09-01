@@ -1,0 +1,45 @@
+name: Suggester (Claude Sonnet 4)
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+on:
+  # Handmatig starten met PR-nummer
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to apply SUGGESTIONS for"
+        required: true
+  # Slash-command in PR comments
+  issue_comment:
+    types: [created]
+
+jobs:
+  run:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body || '', '/apply-suggestions'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Apply SUGGESTIONS with Claude
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          PR_NUMBER: ${{ inputs.pr }}
+          # Zet op "true" als je liever een aparte PR met suggesties wilt
+          SUGGESTIONS_SEPARATE_PR: "false"
+        run: node .github/scripts/apply_suggestions.js
