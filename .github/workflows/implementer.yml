@@ -21,7 +21,7 @@ jobs:
           echo "${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Call Anthropic (Claude) without external deps
+      - name: Call Anthropic (Claude)
         id: claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -66,7 +66,6 @@ except Exception as e:
   print("ERROR calling Anthropic:", e, file=sys.stderr)
   sys.exit(1)
 
-# concat text blocks (Anthropic returns content as array)
 text = ""
 for part in res.get("content", []):
   if part.get("type") == "text":
@@ -79,19 +78,17 @@ PY
         id: write
         run: |
           python3 - << 'PY'
-import re, pathlib, sys
+import re, pathlib
 txt = open("claude_out.txt", encoding="utf-8").read()
 
 files = re.findall(r"<<<file:(.+?)>>>\n(.*?)\n<<<endfile>>>", txt, flags=re.S)
-if not files:
-  print("No files returned from Claude. Full payload follows:\n", txt)
 for path, code in files:
   p = pathlib.Path(path)
   p.parent.mkdir(parents=True, exist_ok=True)
   p.write_text(code, encoding="utf-8")
 
-cmds_match = re.findall(r"<<<commands>>>\n(.*?)\n<<<endcommands>>>", txt, flags=re.S)
-open("commands.txt","w",encoding="utf-8").write(cmds_match[0] if cmds_match else "")
+cmds = re.findall(r"<<<commands>>>\n(.*?)\n<<<endcommands>>>", txt, flags=re.S)
+open("commands.txt","w",encoding="utf-8").write(cmds[0] if cmds else "")
 PY
 
       - name: Create Branch, Commit, PR
