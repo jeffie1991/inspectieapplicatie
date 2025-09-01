@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <input type="file" id="fileInput" accept=".pdf" class="file-input">
+                <label for="fileInput" class="btn btn-primary">Open PDF</label>
+            </div>
+            <div class="toolbar-center">
+                <button class="btn" id="prevPage">←</button>
+                <span class="page-info">
+                    <input type="number" id="pageNum" value="1" min="1"> / 
+                    <span id="pageCount">0</span>
+                </span>
+                <button class="btn" id="nextPage">→</button>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn" id="zoomOut">-</button>
+                <span id="zoomLevel">100%</span>
+                <button class="btn" id="zoomIn">+</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Thumbnails Panel -->
+            <div class="thumbnails-panel" id="thumbnailsPanel">
+                <div class="panel-header">
+                    <h3>Thumbnails</h3>
+                </div>
+                <div class="thumbnails-container" id="thumbnailsContainer">
+                    <!-- Thumbnail skeleton loaders -->
+                    <div class="thumbnail-skeleton"></div>
+                    <div class="thumbnail-skeleton"></div>
+                    <div class="thumbnail-skeleton"></div>
+                </div>
+            </div>
+
+            <!-- PDF Viewer -->
+            <div class="pdf-viewer">
+                <div class="loading-skeleton" id="loadingSkeleton">
+                    <div class="skeleton-page"></div>
+                </div>
+                <div class="error-state hidden" id="errorState">
+                    <div class="error-content">
+                        <h3>Failed to load PDF</h3>
+                        <p>Please try again or select a different file.</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            Choose Another File
+                        </button>
+                    </div>
+                </div>
+                <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="side-panel" id="sidePanel">
+                <div class="panel-header">
+                    <h3>Document Info</h3>
+                </div>
+                <div class="panel-content">
+                    <div class="info-item">
+                        <label>Title:</label>
+                        <span id="docTitle">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Author:</label>
+                        <span id="docAuthor">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Pages:</label>
+                        <span id="docPages">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Size:</label>
+                        <span id="docSize">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

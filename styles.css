@@ -1,0 +1,262 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.toolbar-left, .toolbar-center, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: #f0f0f0;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.file-input {
+    display: none;
+}
+
+.page-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#pageNum {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Main Content */
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Thumbnails Panel */
+.thumbnails-panel {
+    width: 200px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+}
+
+.panel-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.thumbnails-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.thumbnail-skeleton {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.thumbnail {
+    width: 100%;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.thumbnail:hover {
+    border-color: #007bff;
+}
+
+.thumbnail.active {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.3);
+}
+
+/* PDF Viewer */
+.pdf-viewer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    background: #e5e5e5;
+    position: relative;
+}
+
+.loading-skeleton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skeleton-page {
+    width: 600px;
+    height: 800px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.pdf-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background: white;
+    margin: 20px;
+}
+
+.error-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.error-content {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.error-content h3 {
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.error-content p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Side Panel */
+.side-panel {
+    width: 250px;
+    background: #fff;
+    border-left: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-content {
+    padding: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #333;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.info-item span {
+    color: #666;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+/* Loading Animation */
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .thumbnails-panel {
+        width: 150px;
+    }
+    
+    .side-panel {
+        width: 200px;
+    }
+    
+    .toolbar-center {
+        flex: 1;
+        justify-content: center;
+    }
+}
