@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthed() { return request.auth != null; }
+    function tenant() { return request.auth.token.tenantId; }
+    function inTenant() { return resource.data.tenantId == tenant(); }
+    function role() { return request.auth.token.role; }
+    function canWrite() { return role() in ['Admin','Editor','Inspector']; }
+    function canAdmin() { return role() == 'Admin'; }
+
+    match /tenants/{id} {
+      allow read: if isAuthed() && tenant() == id;
+      allow write: if isAuthed() && tenant() == id && canAdmin();
+    }
+
+    match /projects/{id} {
+      allow read: if isAuthed() && inTenant();
+      allow write: if isAuthed() && inTenant() && (canAdmin() || role() == 'Editor');
+    }
+
+    match /documents/{id} {
+      allow read: if isAuthed() && inTenant();
+      allow create: if isAuthed() && inTenant() && canWrite();
+      allow update, delete: if isAuthed() && inTenant() && (canAdmin() || role() == 'Editor');
+    }
+
+    match /annotations/{id} {
+      allow read: if isAuthed() && inTenant();
+      allow create, update: if isAuthed() && inTenant() && canWrite();
+      allow delete: if isAuthed() && inTenant() && (canAdmin() || role() == 'Editor');
+    }
+
+    match /reports/{id} {
+      allow read, create: if isAuthed() && inTenant();
+      allow update, delete: if isAuthed() && inTenant() && (canAdmin() || role() == 'Editor');
+    }
+  }
+}
