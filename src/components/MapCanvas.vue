@@ -77,12 +77,16 @@ export default {
       ydoc: null,
       yshapes: null,
       provider: null,
-      snapThreshold: 10
+      snapThreshold: 10,
+      saveError: null
     }
   },
   computed: {
     currentLassoPoints() {
       return this.currentLasso.map(p => `${p.x},${p.y}`).join(' ')
+    },
+    websocketUrl() {
+      return process.env.VUE_APP_WEBSOCKET_URL || 'ws://localhost:1234'
     }
   },
   mounted() {
@@ -99,7 +103,7 @@ export default {
       this.ydoc = new Y.Doc()
       this.yshapes = this.ydoc.getArray('shapes')
       
-      this.provider = new WebsocketProvider('ws://localhost:1234', 'map-room', this.ydoc)
+      this.provider = new WebsocketProvider(this.websocketUrl, 'map-room', this.ydoc)
       
       this.yshapes.observe(this.syncShapes)
       this.syncShapes()
@@ -292,9 +296,12 @@ export default {
     },
     
     async saveToFirestore() {
+      this.saveError = null
+      
       try {
         const geoJson = this.shapesToGeoJSON()
         const docRef = doc(collection(db, 'maps'), 'current-map')
+        
         await setDoc(docRef, {
           geoJson,
           metadata: {
@@ -302,8 +309,33 @@ export default {
             shapeCount: this.shapes.length
           }
         })
+        
       } catch (error) {
+        this.saveError = this.getErrorMessage(error)
         console.error('Error saving to Firestore:', error)
+        
+        // Show user notification
+        this.$emit('save-error', this.saveError)
+        
+        // Retry logic for network errors
+        if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
+          setTimeout(() => this.saveToFirestore(), 2000)
+        }
+      }
+    },
+    
+    getErrorMessage(error) {
+      switch (error.code) {
+        case 'permission-denied':
+          return 'You do not have permission to save changes. Please check your login status.'
+        case 'unavailable':
+          return 'Service temporarily unavailable. Retrying...'
+        case 'deadline-exceeded':
+          return 'Save operation timed out. Retrying...'
+        case 'unauthenticated':
+          return 'Please log in to save your changes.'
+        default:
+          return 'Failed to save changes. Please try again.'
       }
     },
     
