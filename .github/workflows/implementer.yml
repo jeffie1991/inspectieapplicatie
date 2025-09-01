@@ -2,9 +2,11 @@ name: Implementer (Claude)
 permissions:
   contents: write
   pull-requests: write
+
 on:
   issues:
     types: [opened, edited, labeled]
+
 jobs:
   build-feature:
     if: contains(github.event.issue.labels.*.name, 'spec')
@@ -19,13 +21,13 @@ jobs:
           echo "${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Ask Claude to implement
+      - name: Call Anthropic (Claude) without external deps
         id: claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python - << 'PY'
-import os, json, requests
+          python3 - << 'PY'
+import os, json, sys, urllib.request
 spec = """${{ steps.spec.outputs.BODY }}"""
 prompt = f"""
 You are Claude Code. Implement the SPEC CARD by returning a set of files with this exact format:
@@ -40,34 +42,56 @@ Then a section:
 one shell command per line
 <<<endcommands>>>
 
-DO NOT include explanations. SPEC:
+NO explanations. SPEC:
 
 {spec}
 """
-headers = {"x-api-key": os.environ["ANTHROPIC_API_KEY"], "content-type":"application/json"}
-data = {
-  "model":"claude-3-5-sonnet-latest",
-  "max_tokens": 4096,
-  "messages":[{"role":"user","content":prompt}]
-}
-res = requests.post("https://api.anthropic.com/v1/messages", headers=headers, data=json.dumps(data)).json()
-text = "".join([b.get("text","") for b in res.get("content",[]) if b.get("type")=="text"])
+req = urllib.request.Request(
+  url="https://api.anthropic.com/v1/messages",
+  headers={
+    "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+    "anthropic-version": "2023-06-01",
+    "content-type":"application/json"
+  },
+  data=json.dumps({
+    "model":"claude-3-5-sonnet-latest",
+    "max_tokens": 4096,
+    "messages":[{"role":"user","content":prompt}]
+  }).encode("utf-8")
+)
+try:
+  with urllib.request.urlopen(req) as r:
+    res = json.loads(r.read().decode("utf-8"))
+except Exception as e:
+  print("ERROR calling Anthropic:", e, file=sys.stderr)
+  sys.exit(1)
+
+# concat text blocks (Anthropic returns content as array)
+text = ""
+for part in res.get("content", []):
+  if part.get("type") == "text":
+    text += part.get("text","")
+
 open("claude_out.txt","w",encoding="utf-8").write(text)
 PY
 
       - name: Parse + Write Files
         id: write
         run: |
-          python - << 'PY'
-import re, os, pathlib
+          python3 - << 'PY'
+import re, pathlib, sys
 txt = open("claude_out.txt", encoding="utf-8").read()
+
 files = re.findall(r"<<<file:(.+?)>>>\n(.*?)\n<<<endfile>>>", txt, flags=re.S)
+if not files:
+  print("No files returned from Claude. Full payload follows:\n", txt)
 for path, code in files:
   p = pathlib.Path(path)
   p.parent.mkdir(parents=True, exist_ok=True)
   p.write_text(code, encoding="utf-8")
-cmds = re.findall(r"<<<commands>>>\n(.*?)\n<<<endcommands>>>", txt, flags=re.S)
-open("commands.txt","w",encoding="utf-8").write(cmds[0] if cmds else "")
+
+cmds_match = re.findall(r"<<<commands>>>\n(.*?)\n<<<endcommands>>>", txt, flags=re.S)
+open("commands.txt","w",encoding="utf-8").write(cmds_match[0] if cmds_match else "")
 PY
 
       - name: Create Branch, Commit, PR
